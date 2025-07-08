@@ -1,0 +1,156 @@
+Q1: How will you pass these values from the parent component?
+Answer:
+In React, we use something called props (short for properties) to pass data from a parent component to a child component. Think of props like arguments we give to a function — they allow a component to receive values and use them internally.
+
+For example, suppose we have a list of products and we want to display each product inside a ProductCard component. Here's how we can pass the name and price of each product from the parent component to the child component:
+// Parent Component
+function ProductList() {
+  const product = { name: "Wireless Mouse", price: 499 };
+  return <ProductCard name={product.name} price={product.price} />;
+}
+
+// Child Component
+function ProductCard({ name, price }) {
+  return (
+    <div>
+      <h3>{name}</h3>
+      <p>₹{price}</p>
+    </div>
+  );
+}
+In the above code, the ProductCard receives the name and price via props, which allows it to display the correct information for each product. This approach makes our components reusable and dynamic.
+
+Q2: How will you implement this toggle using useState?
+Answer:
+To make the "Like" button work dynamically — changing between “Like 🤍” and “Liked ❤️” — we need to keep track of whether the product is liked or not. For this, React provides a hook called useState, which allows us to manage state in functional components.
+
+Here's how we can do it:
+import React, { useState } from 'react';
+
+function ProductCard({ name, price }) {
+  const [liked, setLiked] = useState(false); // Initial state: not liked
+
+  const toggleLike = () => {
+    setLiked(prev => !prev); // Toggle between true and false
+  };
+
+  return (
+    <div>
+      <h3>{name}</h3>
+      <p>₹{price}</p>
+      <button onClick={toggleLike}>
+        {liked ? "Liked ❤️" : "Like 🤍"}
+      </button>
+    </div>
+  );
+}
+Here, we use the liked state to determine the current status. When the button is clicked, toggleLike() is called, which flips the state. The button label changes automatically because it's based on the current value of liked.
+
+
+
+Q3: How will you manage this input using a controlled component approach?
+Answer:
+A controlled component in React means the form input (like a search box) is controlled by React state. The value of the input is not stored in the DOM, but in the component’s useState.
+
+Here’s how we can build a search bar that updates as the user types:
+import React, { useState } from 'react';
+
+function SearchBar({ onSearch }) {
+  const [query, setQuery] = useState(""); // Store user input
+
+  const handleChange = (e) => {
+    setQuery(e.target.value);       // Update state with each keystroke
+    onSearch(e.target.value);       // Optionally inform parent
+  };
+
+  return (
+    <input
+      type="text"
+      value={query}
+      onChange={handleChange}
+      placeholder="Search products..."
+    />
+  );
+}
+In this code:
+
+query stores the value of the input.
+
+When the user types, the onChange event updates the state.
+
+The input always reflects the current value of query.
+
+This approach ensures that the input box behaves predictably and allows us to easily add validations, filters, and other logic.
+
+
+
+Q4: How will you share the current theme across all components using useContext?
+Answer:
+React's useContext is perfect for sharing global data like theme (light or dark) without passing it manually through props to every component.
+
+Here's how to do it:
+
+1. Create a context to hold the theme and toggle logic:
+import React, { createContext, useState, useContext } from 'react';
+
+const ThemeContext = createContext();
+
+export function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState("light");
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === "light" ? "dark" : "light"));
+  };
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+2. Use the context inside any component:
+function Header() {
+  const { theme, toggleTheme } = useContext(ThemeContext);
+
+  return (
+    <header className={theme}>
+      <h1>E-Commerce App</h1>
+      <button onClick={toggleTheme}>Toggle Theme</button>
+    </header>
+  );
+}
+With this setup:
+
+Any component can access the theme and toggleTheme function using useContext.
+
+This avoids repeating code and makes the theme available app-wide.
+
+
+Q5: How will you protect this route to restrict unauthenticated access?
+Answer:
+To protect the "Checkout" page so that only logged-in users can access it, we can use a ProtectedRoute component. It works like a gatekeeper — if the user is authenticated, it allows them in. If not, it redirects them to the login page.
+
+Here’s how we can implement it using React Router v6:
+// ProtectedRoute.js
+import { Navigate } from 'react-router-dom';
+
+function ProtectedRoute({ isAuthenticated, children }) {
+  return isAuthenticated ? children : <Navigate to="/login" />;
+}
+Usage:
+<Routes>
+  <Route path="/checkout" element={
+    <ProtectedRoute isAuthenticated={userLoggedIn}>
+      <Checkout />
+    </ProtectedRoute>
+  } />
+</Routes>
+How it works:
+
+userLoggedIn is a boolean that tells if the user is logged in.
+
+If true, the Checkout component is shown.
+
+If false, the user is redirected to /login.
+
+This method helps maintain security and privacy, especially for sensitive operations like payments and order placement.
